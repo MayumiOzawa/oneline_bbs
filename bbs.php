@@ -1,3 +1,46 @@
+<?php
+	session_start();
+	require('dbconnect.php');
+
+	//投稿をDBに保存する
+	if (empty($_POST)){
+	}else{
+		$nickname = mysqli_real_escape_string($db, $_POST['nickname']);
+		$comment = mysqli_real_escape_string($db, $_POST['comment']);
+
+		if ($_POST['edit_id']=='') {
+			$sql = "INSERT INTO posts SET nickname='$nickname', comment='$comment', created=NOW()";
+		}else{
+			$sql = sprintf('UPDATE posts SET nickname="%s", comment="%s" WHERE id=%d', $nickname, $comment, mysqli_real_escape_string($db, $_POST['edit_id'])
+			);
+		}
+		echo $sql;
+		mysqli_query($db, $sql) or die(mysqli_error($db));
+
+		header('Location: bbs.php');
+		exit();
+	}
+
+	//投稿を取得する
+	$sql = "SELECT * FROM posts ORDER BY created DESC";
+	$record = mysqli_query($db, $sql);
+
+	//投稿の編集ボタンが押された場合の処理
+	if (isset($_GET['edit'])){
+		$esql = sprintf('SELECT * FROM posts WHERE id=%d',
+			mysqli_real_escape_string($db, $_GET['edit'])
+		);
+		//var_dump($sql);
+		$erecord = mysqli_query($db, $esql) or die(mysqli_error($db));
+		$etable = mysqli_fetch_assoc($erecord);
+
+		$nickname = $etable['nickname'];
+		$comment = $etable['comment'];
+	}
+
+?>
+
+
 <!DOCTYPE HTML>
 <html lang="ja">
 	<head>
@@ -41,7 +84,7 @@
 					<div class="form-group">
 						<div class="input-group">
 	
-	             			<input type="text" name="nickname" class="form-control" id="validate-text" placeholder="nickname" value="" required>
+	             			<input type="text" name="nickname" class="form-control" id="validate-text" placeholder="nickname" value="<?php if(isset($nickname)){ echo htmlspecialchars($nickname); } ?>" required>
               				<!-- ×＆チェックボタン表示 -->
 							<span class="input-group-addon danger"><span class="glyphicon glyphicon-remove"></span></span>
 						</div>
@@ -51,14 +94,25 @@
 						<div class="input-group" data-validate="length" data-length="4">
 						<!-- <TEXTAREA>←複数行の入力フィールドを作成するタグ -->
 						<!-- placeholder←入力欄内に書かれている文字の指定が出来る -->
-						<textarea type="text" class="form-control" name="comment" id="validate-length" placeholder="comment" required></textarea>
+						<textarea type="text" class="form-control" name="comment" id="validate-length" placeholder="comment" required><?php if(isset($comment)){ echo htmlspecialchars($comment); } ?></textarea>
 						<span class="input-group-addon danger"><span class="glyphicon glyphicon-remove"></span></span>
 					</div>
 					</div>
 
 					<!-- col-xs-12←col-md-4の中の全部の長さを指定 -->
 					<!-- disabled←入力・選択不可能にする -->
-					<button type="submit" class="btn btn-primary col-xs-12" disabled>つぶやく</button>
+					<?php
+						if (isset($etable['nickname']) && isset($etable['comment'])) {
+					?>
+							<input type="hidden" name="edit_id" value="<?php echo htmlspecialchars($etable['id'], ENT_QUOTES, 'UTF-8'); ?>" />				
+							<button type="submit" class="btn btn-primary col-xs-12" disabled>再投稿</button>	
+					<?php
+						}else{
+					?>
+							<button type="submit" class="btn btn-primary col-xs-12" disabled>つぶやく</button>
+					<?php
+						}
+					?>
 
 					</form>
 				</div><!-- col-md-4 -->
@@ -67,43 +121,33 @@
 				<div class="timeline-centered">
 
 					<!-- 記事であることを示すタグ -->
-					<article class="timeline-entry">
 
-            			<div class="timeline-entry-inner">
-
-                			<div class="timeline-icon bg-success">
-			                    <i class="entypo-feather"></i>
-			                    <i class="fa fa-cogs"></i>
-                			</div>
-
- 							<div class="timeline-label">
- 								<!-- href="#" ←「そのページの最上部へのリンク」 -->
-			                    <h2><a href="#">はなこ</a> <span>2015-11-10 21:00:00</span></h2>
-			                    <p>たろうさん、はじめまして！！</p>
-                			</div>
-
-                		</div>
-
-					</article>
+				<?php
+					while ($table = mysqli_fetch_assoc($record)):	
+				?>
 
 					<article class="timeline-entry">
 
             			<div class="timeline-entry-inner">
 
-                			<div class="timeline-icon bg-success">
+                			<div class="timeline-icon bg-success"> </a>
 			                    <i class="entypo-feather"></i>
-			                    <i class="fa fa-cogs"></i>
+			                    
+			                    <a href="bbs.php?edit=<?php echo htmlspecialchars($table['id'], ENT_QUOTES, 'UTF-8'); ?>">
+			                    	<i class="fa fa-cogs"></i>
+			                    </a>
                 			</div>
 
  							<div class="timeline-label">
  								<!-- href="#" ←「そのページの最上部へのリンク」 -->
-			                    <h2><a href="#">たろう</a> <span>2015-11-10 20:53:18</span></h2>
-			                    <p>はじめまして！</p>
+			                    <h2><a href="#"></a><?php echo $table['nickname']?><span><?php echo $table['created']?></span></h2>
+			                    <p><?php echo $table['comment'] ?></p>
                 			</div>
 
                 		</div>
 
 					</article>
+				<?php endwhile; ?> 
 
 					<article class="timeline-entry begin">
 

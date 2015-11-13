@@ -280,6 +280,10 @@ img {
                         color: #303641;
                     }
 
+                    .timeline-entry-inner a {
+                        color: #fff;
+                    }
+
                     .timeline-centered .timeline-entry .timeline-entry-inner .timeline-label h2 span {
                         -webkit-opacity: .6;
                         -moz-opacity: .6;
