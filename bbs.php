@@ -22,7 +22,7 @@
 	}
 
 	//投稿を取得する
-	$sql = "SELECT * FROM posts ORDER BY created DESC";
+	$sql = "SELECT * FROM posts WHERE delete_flag=0 ORDER BY created DESC";
 	$record = mysqli_query($db, $sql);
 
 	//投稿の編集ボタンが押された場合の処理
@@ -39,8 +39,9 @@
 	}
 
 ?>
-
-
+<script type="text/JavaScript">
+	function com
+</script>
 <!DOCTYPE HTML>
 <html lang="ja">
 	<head>
@@ -140,8 +141,13 @@
 
  							<div class="timeline-label">
  								<!-- href="#" ←「そのページの最上部へのリンク」 -->
-			                    <h2><a href="#"></a><?php echo $table['nickname']?><span><?php echo $table['created']?></span></h2>
-			                    <p><?php echo $table['comment'] ?></p>
+			                    <h2><a href="#"></a><?php echo $table['nickname']?><span><?php echo $table['created']?></span>
+			                    	<a href="delete.php?del=<?php echo htmlspecialchars($table['id'], ENT_QUOTES, 'UTF-8'); ?>">
+			                    		<button type="submit" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-trash" onclick='return confirm("このひとことを本当に消しても良いですか？");'></span></button>
+			                    	</a>
+			                    </h2>
+			                    <p><?php echo $table['comment'] ?>
+		                    	</p>
                 			</div>
 
                 		</div>
