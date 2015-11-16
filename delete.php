@@ -11,4 +11,5 @@
 		header('Location: bbs.php');
 		exit();
 	}
+	
 ?>
